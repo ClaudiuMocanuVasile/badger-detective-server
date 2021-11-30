@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 # Imports
 
 import urllib.request
@@ -18,157 +19,56 @@ def page_to_string(url):
 
     return string
 
+# get price of a product
+# @product: string, the <div class="card-v2"> stuff
+# @return: int, the price as int
+def get_price(product):
+    row = product.split("class=\"product-new-price\">")[1].split('\n')[0]
+    money = row.split("<sup>");
+    hi = money[0].replace("&#46;","")
+    lo = money[1].split("<")[0]
+    return float(f"{hi}.{lo}")
 
+# get the name of product
+# @product: string
+# @return: string, the name
+def get_name(product):
+    row = product.split("data-zone=\"title\">")[1]
+    return row.split("</a>")[0];
 
-def get_string(start, end, string):
-    """This function receives three strings as arguments and returns the
-       characters found in the string between start and end substrings
+# get the url of product
+# @product: string
+# @return: string, the url
+def get_url(product):
+    row = product.split("card-v2-info\"><a href=\"")[1]
+    url = row.split('"')[0]
+    return url
+
+# izolates the tags of the specified class
+# @page_str: string, the html page
+# @return list of strings of '<div class="card-v2">'
+def izolate_html_class(page_str, tag_str, class_str):
     """
-
-    found_string = (string.split(start))[1].split(end)[0]
-
-    return found_string
-
-
-
-def return_product_links(string):
-    """This function receives an url as an argument, finds the number of products,
-       computes the number of pages used for product pagination in a subcategory,
-       iterates through all the pages, creates a list with all the product links
-       and returns them
+    Bug: Doesn't look for the closing </tag>
+    So you may not get what you expect
     """
-
-    product_links = get_product_links(string)
-
-    # Get number of pages in a subcategory
-
-    page_as_string = page_to_string(string)
-
-    num_of_pages = get_string('<span class="title-phrasing title-phrasing-sm">', ' de produse</span>', page_as_string)
-
-    num_of_pages = int(num_of_pages)//60 if int(num_of_pages) % 60 == 0 else int(num_of_pages)//60 + 1
-
-    # For each page, create the link to the page, then get all product links
-
-    for i in range(2, num_of_pages + 1):
-        temp = string.split("/c?ref=search_menu_category")[0]
-        temp = temp + "/p" + str(i) + "/c?ref=search_menu_category"
-        product_links.extend(get_product_links(temp))
-    
-    return product_links
-
-
-
-def get_product_links(string):
-    """This function receives an url as an argument and returns
-       all the product links in a single product grid page
-    """
-
-    page_as_string = page_to_string(string)
-
-    start = '<div class="pad-hrz-xs">'
-    end = '" class="card-v2-title'
-
-    temp = page_as_string.split(start)
-
-    links = []
-
-    temp = temp[1:] # get rid of the cluster of HTML before the first link
-
-    for item in temp:
-        links.append(item.split(end)[0].strip()[9:]) # get rid of <a href=""
-
-    return links
-
-
-
-def return_prices(string):
-    """This function receives the url of a product's page and returns
-       the PRP and price of the product
-    """
-
-    # Transform page into string
-    page_as_string = page_to_string(string)
-
-    # PRP
-    prp_price = get_prp_price(page_as_string).replace("&#46;","")
-
-    print("PRP: " + prp_price + " Lei")
-
-    # Discounted price
-    discounted_price = get_price(page_as_string, prp_price).replace("&#46;","")
-
-    print("Price: " + discounted_price + " Lei")
-
-    if prp_price != " ":
-        print("You save: " + str(float(prp_price) - float(discounted_price)) + " Lei")
-    
-    return prp_price, discounted_price
-
-
-
-def get_prp_price(string):
-    """This function receives a webpage's HTML code as a string, extracts the PRP
-       (price recommended by producer) of a product, if it has one, and returns it
-    """
-
-    integer = ""
-
-    # Separate string with PRP
-    prp = get_string('"pricing rrp-lp30d"', "</P", string)
-
-    # Rare case when there's no PRP, but the "lowest price in the last 30 days" is displayed (allegedly, we'll see about that)
-    if "<s>" in prp and "</s>" in prp:
-        prp = "<custom>" + get_string('<s>', "</s>", string)
-        print(prp)
-        # Get integer of PRP
-        integer = get_string("<custom>", "<sup>", prp)
-    elif prp.strip() == ">":
-        # Some products don't have PRP
-        return " "
-    elif "Separat" in prp:
-        integer = get_string("Separat: ", "<sup>", prp)
-    else:
-        # Get integer of PRP
-        integer = get_string("PRP: ", "<sup>", prp)
-    
-    # Get decimals of PRP
-    decimals = get_string("<sup>", "</sup>", prp)
-    
-    return integer + "." + decimals
-
-
-
-def get_price(string, prp):
-    """This function receives a webpage's HTML code as a string, extracts the price
-       of a product and returns it
-    """
-
-    # Separate string with discounted price
-    if prp == " ":
-        discounted_price = get_string('"product-new-price"', "<span>", string)
-    else:
-        discounted_price = get_string('"product-new-price has-deal"', "<span>", string)
-
-    # Get decimals of discounted price
-    decimals = get_string("<sup>", "</sup>", discounted_price)
-
-    # Get integer of discounted price
-    integer = get_string('>', '<sup', discounted_price)
-
-    return integer + "." + decimals
-
-
+    target=f"<{tag_str} class=\"{class_str}\">"
+    pp = page_str.split(target)[1:]
+    return pp
 
 # Main
+def main():
+    
+    link = "https://www.emag.ro/telefoane-mobile/c"
+    page = page_to_string(link)
+    products = izolate_html_class(page, "div", "card-v2");
+    for p in products:
+        price = get_price(p);
+        name = get_name(p);
+        url = get_url(p);
+        print(f"URL: {url}")
+        print(f"Name: {name}")
+        print(f"Price: {price}")
 
 if __name__ == "__main__":
-
-    
-    product_submenu_link = "https://www.emag.ro/telefoane-mobile/c?ref=search_menu_category"
-
-    product_links = return_product_links(product_submenu_link)
-
-    for item in product_links:
-        print(item)
-        return_prices(item)
+   main() 
