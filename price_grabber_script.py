@@ -3,6 +3,12 @@
 
 import urllib.request
 import sqlite3
+import sys
+
+def usage(prog):
+    print(f"Usage: {prog} URL")
+    print("The URL has to be from a category page, not a product page")
+    sys.exit(1)
 
 
 # Functions
@@ -59,7 +65,11 @@ def izolate_html_class(page_str, tag_str, class_str):
 # Main
 def main():
     
-    link = "https://www.emag.ro/telefoane-mobile/c"
+    if len(sys.argv) != 2:
+        usage(sys.argv[0])
+        return
+
+    link = sys.argv[1]
     page = page_to_string(link)
     products = izolate_html_class(page, "div", "card-v2");
     for p in products:
