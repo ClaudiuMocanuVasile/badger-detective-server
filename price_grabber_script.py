@@ -29,10 +29,14 @@ def page_to_string(url):
 # @product: string, the <div class="card-v2"> stuff
 # @return: int, the price as int
 def get_price(product):
-    row = product.split("class=\"product-new-price\">")[1].split('\n')[0]
-    money = row.split("<sup>");
-    hi = money[0].replace("&#46;","")
-    lo = money[1].split("<")[0]
+    try:
+        row = product.split("class=\"product-new-price\">")[1].split('\n')[0]
+        money = row.split("<sup>");
+        hi = money[0].replace("&#46;","")
+        lo = money[1].split("<")[0]
+    except:
+        print("Exception")
+        return 0
     return float(f"{hi}.{lo}")
 
 # get the name of product
@@ -55,16 +59,43 @@ def get_url(product):
 # @return list of strings of '<div class="card-v2">'
 def izolate_html_class(page_str, tag_str, class_str):
     """
-    Bug: Doesn't look for the closing </tag>
+    Bug: Doesn't seems to work when looking for the closing </tag>
     So you may not get what you expect
     """
     target=f"<{tag_str} class=\"{class_str}\">"
     pp = page_str.split(target)[1:]
-    return pp
+
+    opened=f"<{tag_str}"
+    closed=f"</{tag_str}>"
+    res = []
+    for p in pp:
+        line = ""
+        count = 1
+        for word in p.split(" "):
+            if len(line) > 0:
+                line += " "
+            if opened in word:
+                count += 1
+            elif closed in word:
+                count -=1
+            if count == 0:
+                print("gasit sfarsit")
+                break
+            line += word
+        res.append(line)
+    return res
+
+def test():
+    page="<div class=\"a\"> <p> da <div class=\"b\"> c </div> asd</p> </div> nu trebuia sa fie aici"
+    page += '\n'
+    page += "<span> ceva </span> <div class=\"a\"> salut </div>"
+    print(page)
+    iz = izolate_html_class(page, "div", "a")
+    print(iz)
 
 # Main
 def main():
-    
+
     if len(sys.argv) != 2:
         usage(sys.argv[0])
         return
@@ -81,4 +112,4 @@ def main():
         print(f"Price: {price}")
 
 if __name__ == "__main__":
-   main() 
+    main()
