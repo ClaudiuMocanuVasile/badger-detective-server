@@ -5,6 +5,7 @@ import urllib.request
 import sqlite3
 import sys
 
+# display usage message
 def usage(prog):
     print(f"Usage: {prog} URL")
     print("The URL has to be from a category page, not a product page")
@@ -29,14 +30,16 @@ def page_to_string(url):
 # @product: string, the <div class="card-v2"> stuff
 # @return: int, the price as int
 def get_price(product):
-    try:
-        row = product.split("class=\"product-new-price\">")[1].split('\n')[0]
-        money = row.split("<sup>");
-        hi = money[0].replace("&#46;","")
-        lo = money[1].split("<")[0]
-    except:
-        print("Exception")
-        return 0
+    row = product.split("class=\"product-new-price\">")
+    if len(row) > 1:
+        row = row[1].split('\n')[0]
+    else:
+        # pret "de la"
+        row = product.split("class=\"product-new-price unfair-price\">")[1]
+        row = row.split("</span>")[1]
+    money = row.split("<sup>");
+    hi = money[0].replace("&#46;","")
+    lo = money[1].split("<")[0]
     return float(f"{hi}.{lo}")
 
 # get the name of product
@@ -56,13 +59,12 @@ def get_url(product):
 
 # izolates the tags of the specified class
 # @page_str: string, the html page
-# @return list of strings of '<div class="card-v2">'
-def izolate_html_class(page_str, tag_str, class_str):
-    """
-    Bug: Doesn't seems to work when looking for the closing </tag>
-    So you may not get what you expect
-    """
-    target=f"<{tag_str} class=\"{class_str}\">"
+# @tag_str: string, the tag like p for <p>
+# @type_str: string, the rest of the arguments inside the tag like class=...
+# @return list of strings from inside tags '<tag_str type_str>'
+def izolate_html_class(page_str, tag_str, type_str):
+    target=f"<{tag_str} {type_str}>"
+    print(f"Looking for {target}")
     pp = page_str.split(target)[1:]
 
     opened=f"<{tag_str}"
@@ -75,22 +77,21 @@ def izolate_html_class(page_str, tag_str, class_str):
             if len(line) > 0:
                 line += " "
             if opened in word:
-                count += 1
-            elif closed in word:
-                count -=1
+                count += word.count(opened)
+            if closed in word:
+                count -= word.count(closed)
             if count == 0:
-                print("gasit sfarsit")
                 break
             line += word
         res.append(line)
     return res
 
+# short test for izolate_html_class
 def test():
-    page="<div class=\"a\"> <p> da <div class=\"b\"> c </div> asd</p> </div> nu trebuia sa fie aici"
-    page += '\n'
-    page += "<span> ceva </span> <div class=\"a\"> salut </div>"
-    print(page)
-    iz = izolate_html_class(page, "div", "a")
+    f = open("/tmp/clip", "r")
+    page = f.read()
+    f.close()
+    iz = izolate_html_class(page, "div", "class=\"card-v2\"")
     print(iz)
 
 # Main
@@ -102,7 +103,7 @@ def main():
 
     link = sys.argv[1]
     page = page_to_string(link)
-    products = izolate_html_class(page, "div", "card-v2");
+    products = izolate_html_class(page, "div", "class=\"card-v2\"");
     for p in products:
         price = get_price(p);
         name = get_name(p);
