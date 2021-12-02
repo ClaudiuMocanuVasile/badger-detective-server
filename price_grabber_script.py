@@ -26,6 +26,41 @@ def page_to_string(url):
 
     return string
 
+def get_string(start, end, string):
+    """This function receives three strings as arguments and returns the
+       characters found in the string between start and end substrings
+    """
+
+    found_string = (string.split(start))[1].split(end)[0]
+
+    return found_string
+
+def return_product_links(string):
+    """This function receives an url as an argument, finds the number of products,
+       computes the number of pages used for product pagination in a subcategory,
+       iterates through all the pages, creates a list with all the product links
+       and returns them
+    """
+
+    # Get number of pages in a subcategory
+
+    pages = [string]
+
+    page_as_string = page_to_string(string)
+
+    num_of_pages = get_string('<span class="title-phrasing title-phrasing-sm">', ' de produse</span>', page_as_string)
+
+    num_of_pages = int(num_of_pages)//60 if int(num_of_pages) % 60 == 0 else int(num_of_pages)//60 + 1
+
+    # For each page, create the link to the page, then get all product links
+
+    for i in range(2, num_of_pages + 1):
+        temp = string.split("/c?ref=search_menu_category")[0]
+        temp = temp + "/p" + str(i) + "/c?ref=search_menu_category"
+        pages.append(temp)
+
+    return pages
+
 # get price of a product
 # @product: string, the <div class="card-v2"> stuff
 # @return: int, the price as int
@@ -63,8 +98,7 @@ def get_url(product):
 # @type_str: string, the rest of the arguments inside the tag like class=...
 # @return list of strings from inside tags '<tag_str type_str>'
 def izolate_html_class(page_str, tag_str, type_str):
-    target=f"<{tag_str} {type_str}>"
-    print(f"Looking for {target}")
+    target=f'<{tag_str} class="{type_str}">'
     pp = page_str.split(target)[1:]
 
     opened=f"<{tag_str}"
@@ -101,16 +135,20 @@ def main():
         usage(sys.argv[0])
         return
 
-    link = sys.argv[1]
-    page = page_to_string(link)
-    products = izolate_html_class(page, "div", "class=\"card-v2\"");
-    for p in products:
-        price = get_price(p);
-        name = get_name(p);
-        url = get_url(p);
-        print(f"URL: {url}")
-        print(f"Name: {name}")
-        print(f"Price: {price}")
+    links = return_product_links(sys.argv[1])
+
+    for link in links:
+        print(link)
+        page = page_to_string(link)
+        products = izolate_html_class(page, "div", "card-v2");
+        
+        for p in products:
+            price = get_price(p);
+            name = get_name(p);
+            url = get_url(p);
+            print(f"URL: {url}")
+            print(f"Name: {name}")
+            print(f"Price: {price}")
 
 if __name__ == "__main__":
     main()
