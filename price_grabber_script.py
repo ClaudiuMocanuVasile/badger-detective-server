@@ -4,6 +4,7 @@
 import urllib.request
 import sqlite3
 import sys
+from datetime import datetime, timedelta
 
 # display usage message
 def usage(prog):
@@ -137,18 +138,45 @@ def main():
 
     links = return_product_links(sys.argv[1])
 
+    connection = sqlite3.connect("product_prices.db")
+
+    cursor = connection.cursor()
+    cursor.execute("CREATE TABLE IF NOT EXISTS products (id TEXT primary key, name TEXT, url TEXT)")
+    cursor.execute("CREATE TABLE IF NOT EXISTS prices (pk integer primary key, id TEXT, price REAL, date TEXT)")
+    links = [links[0]]
+
+    # time = (datetime.today() - timedelta(days = 11)).strftime("%d-%m-%Y") # creating artificial prices for testing
+    time = datetime.today().strftime("%d-%m-%Y")
+
     for link in links:
-        print(link)
         page = page_to_string(link)
         products = izolate_html_class(page, "div", "card-v2");
         
         for p in products:
+            # price = get_price(p) + 150; # creating artificial prices for testing
             price = get_price(p);
             name = get_name(p);
             url = get_url(p);
+            id = url.split("/")[-2]
+            
+            rows = cursor.execute("SELECT name, url FROM products WHERE id = ?", (id,)).fetchall()
+            if not len(rows):
+                cursor.execute("INSERT INTO products VALUES (?, ?, ?)", (id, name, url))
+                cursor.execute("INSERT INTO prices(id, price, date) VALUES (?, ?, ?)", (id, price, time))
+            else:
+                rows = cursor.execute("SELECT price FROM prices WHERE id = ? ORDER BY date DESC LIMIT 1;", (id,)).fetchall()
+                if rows[0][0] != price:
+                    cursor.execute("INSERT INTO prices(id, price, date) VALUES (?, ?, ?)", (id, price, time))
             print(f"URL: {url}")
             print(f"Name: {name}")
             print(f"Price: {price}")
+
+    # rows = cursor.execute("SELECT * from products").fetchall()
+    # print(*rows,sep="\n",end="\n\n\n\n\n\n")
+    # rows = cursor.execute("SELECT * from prices").fetchall()
+    # print(*rows,sep="\n")
+
+    connection.commit()
 
 if __name__ == "__main__":
     main()
