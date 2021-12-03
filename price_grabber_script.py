@@ -8,6 +8,16 @@ from datetime import datetime, timedelta
 import time
 import multiprocessing
 
+# Added to database
+# https://www.emag.ro/telefoane-mobile/c?ref=search_menu_category # contains dummy data for a few phones in order to test graphs
+# https://www.emag.ro/laptopuri/c?ref=search_menu_category
+# https://www.emag.ro/boxe-pc/c?ref=search_menu_category
+# https://www.emag.ro/casti-pc/c?ref=search_menu_category
+# https://www.emag.ro/televizoare/c?ref=search_menu_category
+# https://www.emag.ro/mouse/c?ref=search_menu_category
+# https://www.emag.ro/tastaturi/c?ref=search_menu_category
+
+
 # display usage message
 def usage(prog):
     print(f"Usage: {prog} URL")
@@ -51,7 +61,7 @@ def return_product_links(string):
 
     page_as_string = page_to_string(string)
 
-    num_of_pages = get_string('<span class="title-phrasing title-phrasing-sm">', ' de produse</span>', page_as_string)
+    num_of_pages = izolate_html_class(page_as_string, "span", "title-phrasing title-phrasing-sm")[0].strip(" de ")
 
     num_of_pages = int(num_of_pages)//60 if int(num_of_pages) % 60 == 0 else int(num_of_pages)//60 + 1
 
@@ -71,6 +81,17 @@ def add_to_db(links):
     cursor = connection.cursor()
     cursor.execute("CREATE TABLE IF NOT EXISTS products (id TEXT primary key, name TEXT, url TEXT)")
     cursor.execute("CREATE TABLE IF NOT EXISTS prices (pk integer primary key, id TEXT, price REAL, date TEXT)")
+
+    # f = open("products.txt", "w", encoding="utf-8")
+    # g = open("prices.txt", "w", encoding="utf-8")
+    # rows = cursor.execute("SELECT * from products").fetchall()
+    # for i in rows:
+    #     f.write(str(i)+"\n")
+    # f.close()
+    # rows = cursor.execute("SELECT * from prices").fetchall()
+    # for i in rows:
+    #     g.write(str(i)+"\n")
+    # g.close()
 
     # time = (datetime.today() - timedelta(days = 11)).strftime("%d-%m-%Y") # creating artificial prices for testing
     time = datetime.today().strftime("%d-%m-%Y")
@@ -100,11 +121,6 @@ def add_to_db(links):
             # print(f"Name: {name}")
             # print(f"Price: {price}")
 
-    # rows = cursor.execute("SELECT * from products").fetchall()
-    # print(*rows,sep="\n",end="\n\n\n\n\n\n")
-    # rows = cursor.execute("SELECT * from prices").fetchall()
-    # print(*rows,sep="\n")
-
 # get price of a product
 # @product: string, the <div class="card-v2"> stuff
 # @return: int, the price as int
@@ -117,7 +133,7 @@ def get_price(product):
         row = product.split("class=\"product-new-price unfair-price\">")[1]
         row = row.split("</span>")[1]
     money = row.split("<sup>");
-    hi = money[0].replace("&#46;","")
+    hi = money[0].replace("&#46;","").strip('<span class="font-size-sm">de la</span> ')
     lo = money[1].split("<")[0]
     return float(f"{hi}.{lo}")
 
@@ -182,7 +198,9 @@ def main():
 
     links = return_product_links(sys.argv[1])
 
-    nr_threads = 8
+    # add_to_db(links)
+
+    nr_threads = 1
 
     p = [0] * nr_threads
 
