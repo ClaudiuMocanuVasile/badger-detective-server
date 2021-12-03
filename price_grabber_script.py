@@ -5,6 +5,8 @@ import urllib.request
 import sqlite3
 import sys
 from datetime import datetime, timedelta
+import time
+import multiprocessing
 
 # display usage message
 def usage(prog):
@@ -62,6 +64,47 @@ def return_product_links(string):
 
     return pages
 
+def add_to_db(links):
+
+    connection = sqlite3.connect("product_prices.db")
+
+    cursor = connection.cursor()
+    cursor.execute("CREATE TABLE IF NOT EXISTS products (id TEXT primary key, name TEXT, url TEXT)")
+    cursor.execute("CREATE TABLE IF NOT EXISTS prices (pk integer primary key, id TEXT, price REAL, date TEXT)")
+
+    # time = (datetime.today() - timedelta(days = 11)).strftime("%d-%m-%Y") # creating artificial prices for testing
+    time = datetime.today().strftime("%d-%m-%Y")
+
+    for link in links:
+        page = page_to_string(link)
+        products = izolate_html_class(page, "div", "card-v2");
+        
+        for p in products:
+            # price = get_price(p) + 150; # creating artificial prices for testing
+            price = get_price(p);
+            name = get_name(p);
+            url = get_url(p);
+            id = url.split("/")[-2]
+            
+            rows = cursor.execute("SELECT name, url FROM products WHERE id = ?", (id,)).fetchall()
+            if not len(rows):
+                cursor.execute("INSERT INTO products VALUES (?, ?, ?)", (id, name, url))
+                cursor.execute("INSERT INTO prices(id, price, date) VALUES (?, ?, ?)", (id, price, time))
+            else:
+                rows = cursor.execute("SELECT price FROM prices WHERE id = ? ORDER BY date DESC LIMIT 1;", (id,)).fetchall()
+                if rows[0][0] != price:
+                    cursor.execute("INSERT INTO prices(id, price, date) VALUES (?, ?, ?)", (id, price, time))
+            
+            connection.commit()
+            # print(f"URL: {url}")
+            # print(f"Name: {name}")
+            # print(f"Price: {price}")
+
+    # rows = cursor.execute("SELECT * from products").fetchall()
+    # print(*rows,sep="\n",end="\n\n\n\n\n\n")
+    # rows = cursor.execute("SELECT * from prices").fetchall()
+    # print(*rows,sep="\n")
+
 # get price of a product
 # @product: string, the <div class="card-v2"> stuff
 # @return: int, the price as int
@@ -97,7 +140,7 @@ def get_url(product):
 # @page_str: string, the html page
 # @tag_str: string, the tag like p for <p>
 # @type_str: string, the rest of the arguments inside the tag like class=...
-# @return list of strings from inside tags '<tag_str type_str>'
+# @return list of strings from inside tags '<tag_str class="type_str">'
 def izolate_html_class(page_str, tag_str, type_str):
     target=f'<{tag_str} class="{type_str}">'
     pp = page_str.split(target)[1:]
@@ -131,6 +174,7 @@ def test():
 
 # Main
 def main():
+    start = time.time()
 
     if len(sys.argv) != 2:
         usage(sys.argv[0])
@@ -138,45 +182,24 @@ def main():
 
     links = return_product_links(sys.argv[1])
 
-    connection = sqlite3.connect("product_prices.db")
+    nr_threads = 8
 
-    cursor = connection.cursor()
-    cursor.execute("CREATE TABLE IF NOT EXISTS products (id TEXT primary key, name TEXT, url TEXT)")
-    cursor.execute("CREATE TABLE IF NOT EXISTS prices (pk integer primary key, id TEXT, price REAL, date TEXT)")
-    links = [links[0]]
+    p = [0] * nr_threads
 
-    # time = (datetime.today() - timedelta(days = 11)).strftime("%d-%m-%Y") # creating artificial prices for testing
-    time = datetime.today().strftime("%d-%m-%Y")
+    k = 0
+    for i in range(0, nr_threads):
+        p[i] = multiprocessing.Process(target=add_to_db, args=(links[k:k + len(links)//nr_threads + 1], ))
+        k += len(links)//nr_threads + 1
+    
+    for i in range(len(p)):
+        p[i].start()
 
-    for link in links:
-        page = page_to_string(link)
-        products = izolate_html_class(page, "div", "card-v2");
-        
-        for p in products:
-            # price = get_price(p) + 150; # creating artificial prices for testing
-            price = get_price(p);
-            name = get_name(p);
-            url = get_url(p);
-            id = url.split("/")[-2]
-            
-            rows = cursor.execute("SELECT name, url FROM products WHERE id = ?", (id,)).fetchall()
-            if not len(rows):
-                cursor.execute("INSERT INTO products VALUES (?, ?, ?)", (id, name, url))
-                cursor.execute("INSERT INTO prices(id, price, date) VALUES (?, ?, ?)", (id, price, time))
-            else:
-                rows = cursor.execute("SELECT price FROM prices WHERE id = ? ORDER BY date DESC LIMIT 1;", (id,)).fetchall()
-                if rows[0][0] != price:
-                    cursor.execute("INSERT INTO prices(id, price, date) VALUES (?, ?, ?)", (id, price, time))
-            print(f"URL: {url}")
-            print(f"Name: {name}")
-            print(f"Price: {price}")
+    for i in range(len(p)):
+        p[i].join()
+    
+    end = time.time()
 
-    # rows = cursor.execute("SELECT * from products").fetchall()
-    # print(*rows,sep="\n",end="\n\n\n\n\n\n")
-    # rows = cursor.execute("SELECT * from prices").fetchall()
-    # print(*rows,sep="\n")
-
-    connection.commit()
+    print(end - start)
 
 if __name__ == "__main__":
     main()
