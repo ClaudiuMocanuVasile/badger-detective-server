@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script type="text/javascript">
+
+        // CSRF token
+
+        function getCSRFToken(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== "") {
+                const cookies = document.cookie.split(";");
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+
+                    if (cookie.substring(0, name.length + 1) === name + "=") {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        var csrftoken = getCSRFToken("csrftoken");
+
+    </script>
+</head>
+<body>
+    <p>Donati dupa, ca nu suntem curve</p>
+    <form method="POST" action="">
+        {% csrf_token %}
+        <label class="block mt-3 font-semibold">{{client_form.link.label}}</label>
+        {{client_form.link}}
+        <input type="submit"/>
+    </form>
+    {% if link %}
+        <h4>Product ID: {{ link }}</h4>
+    {% endif %}
+</body>
+</html>
