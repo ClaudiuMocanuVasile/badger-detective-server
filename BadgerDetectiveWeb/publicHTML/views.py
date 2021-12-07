@@ -14,6 +14,7 @@ def index(request):
 
     else:
         form = ClientForm()
+        link = ""
 
     context = { 'client_form': form, 'link': link}
 

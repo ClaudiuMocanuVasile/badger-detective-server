@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}" />
     <title>Document</title>
     <script type="text/javascript">
 
@@ -30,15 +31,22 @@
     </script>
 </head>
 <body>
-    <p>Donati dupa, ca nu suntem curve</p>
-    <form method="POST" action="">
-        {% csrf_token %}
-        <label class="block mt-3 font-semibold">{{client_form.link.label}}</label>
-        {{client_form.link}}
-        <input type="submit"/>
-    </form>
-    {% if link %}
-        <h4>Product ID: {{ link }}</h4>
-    {% endif %}
+	<div class="container">
+		<h1>Badger Detective</h1>
+		<img src="{% static 'images/badger.gif' %}">
+		<p>Ce produs inspectati?</p>
+		<form method="POST" action="">
+			{% csrf_token %}
+			<label class="block mt-3 font-semibold">{{client_form.link.label}}</label>
+			{{client_form.link}}
+			<input type="submit"/>
+		</form>
+		{% if link %}
+			<h4>Product ID: {{ link }}</h4>
+		{% endif %}
+
+	<div class="inaltator"> </div>
+	</div>
 </body>
 </html>
+

@@ -1,3 +1,162 @@
-p {
-    
+body {
+	height: 100vh;
+	font-family: Arial, Georgia, "Time News Roman";
+	background-repeat: no-repeat;
+	background-size: cover;
+}
+
+.container {
+	width: 60%;
+	position: static;
+	z-index: 0;
+	margin: 0 auto;
+	padding: 20px
+}
+
+img {
+	float: right;
+	width: 300px;
+	margin: 5px;
+}
+
+header {
+	width: 100%;
+	text-align: center;
+	color: #C3073F;
+}
+
+h1 {
+	text-align: center;
+	color: #C3073F;
+}
+
+h1 a{
+	text-decoration: none;
+	color: #C3073F;
+}
+
+section {
+	position: relative;
+	margin: 14px;
+	padding: 20px;
+	text-align: justify;
+	background-repeat: no-repeat;
+	background-size: cover;
+}
+
+section h2 {
+	text-align: center;
+}
+
+section img {
+	width: 30%;
+	height: auto;
+	float: right;
+	position: relative;
+	margin: 20px;
+}
+/* pentru imaginea de profil */
+#profil{
+	 width: 220px;
+ }
+
+/* Pentru a nu lasa imaginile sa iasa din border */
+.inaltator {
+	clear: both;
+	width: 100%;
+}
+
+nav {
+	text-align: center;
+	margin: 14px;
+}
+
+nav li {
+	display: inline-block;
+	margin: 0 20px;
+}
+
+li img{
+	float: right;
+}
+
+button{
+	padding: 10px;
+	text-align: center;
+	font-size: 24;
+}
+
+.orisontal{
+	width: 100%;
+	display: flex;
+	flex-wrap: wrap;
+}
+
+.orisontal .box{
+	flex: auto;
+	border: 1px solid black;
+	margin: 10px;
+	padding: 10px;
+}
+
+.box{
+	transition: 0.5s;
+	background: rgb(0,0,0);
+	background: radial-gradient(circle, rgba(0,0,0,1) 0%, rgba(146,157,149,1) 0%); 
+}
+
+.box .img_holder{
+	position: relative;
+	transform: translateX(20%);
+}
+
+.box .img_holder>img{
+	max-width: 500px;
+	max-height: 500px;
+}
+
+.box .description{
+	text-align: center;
+}
+
+.box:hover{
+	background: rgb(0,0,0);
+	background: radial-gradient(circle, rgba(0,0,0,1) 0%, rgba(146,157,149,1) 100%); 
+}
+
+.img_holder:hover>img{
+	transition-duration: 0.5s;
+	transform: scale(1.2);
+}
+
+.logo_img {
+	display: inline;
+	width: 30px;
+	height: 30px;
+	float: none;
+	vertical-align: middle;
+}
+
+@media only screen and (max-width: 600px){
+	.container {
+		margin: 0 auto;
+		width: 100%;
+		border: 1px solid red;
+		padding: 10px;
+	}
+}
+
+@media (prefers-color-scheme: dark) {
+	body {
+		background-color: #191b22;
+		color: white;
+	}
+
+	a {
+		color: #4ea2df;
+	}
+
+	.container {
+		background-color: #313543;
+	}
 }
