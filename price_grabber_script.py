@@ -74,9 +74,9 @@ def return_product_links(string):
 
     return pages
 
-def add_to_db(links):
+def add_to_db(links, db_file_name="product_prices.db"):
 
-    connection = sqlite3.connect("product_prices.db")
+    connection = sqlite3.connect(db_file_name)
 
     cursor = connection.cursor()
     cursor.execute("CREATE TABLE IF NOT EXISTS products (id TEXT primary key, name TEXT, url TEXT)")
@@ -222,6 +222,7 @@ def test():
 
 # Main
 def main():
+    db_file_name = "product_prices.db"
     start = time.time()
 
     if len(sys.argv) != 2:
@@ -238,7 +239,7 @@ def main():
 
     k = 0
     for i in range(0, nr_threads):
-        p[i] = multiprocessing.Process(target=add_to_db, args=(links[k:k + len(links)//nr_threads + 1], ))
+        p[i] = multiprocessing.Process(target=add_to_db, args=(links[k:k + len(links)//nr_threads + 1], db_file_name))
         k += len(links)//nr_threads + 1
     
     for i in range(len(p)):
