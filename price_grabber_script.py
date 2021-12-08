@@ -180,6 +180,38 @@ def izolate_html_class(page_str, tag_str, type_str):
         res.append(line)
     return res
 
+# strip the tag <tag ...> and </tag>
+# @html_str: string, and html stuff thing...whatever
+# @return: string, the "innerHTML"
+def html_strip_tag(html_str):
+    if html_str[0] != '<':
+        return html_str
+    tag = html_str.split('<')[1]
+    full_tag = tag.split('>')[0]
+    tag = full_tag.split(' ')[0]
+
+    opened = f"<{tag}"
+    closed = f"</{tag}>"
+
+    # index1 - start of the content
+    strip_start = html_str.find('>') + 1
+    count = 1
+    # index2 - end of the conted
+    strip_end = None
+    content = html_str[strip_start:]
+    for (i, c) in enumerate(content):
+        if c == '<':
+            tag_end = content.find('>',i) + 1
+            if opened in content[i:tag_end]:
+                count += 1
+            if closed in content[i:tag_end]:
+                count -= 1
+            if count == 0:
+                strip_end = i
+                break
+
+    return content[:strip_end]
+
 # short test for izolate_html_class
 def test():
     f = open("/tmp/clip", "r")
