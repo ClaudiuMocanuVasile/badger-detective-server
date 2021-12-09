@@ -116,7 +116,7 @@ def add_to_db(links, db_file_name="product_prices.db"):
                 if rows[0][0] != price:
                     cursor.execute("INSERT INTO prices(id, price, date) VALUES (?, ?, ?)", (id, price, time))
             
-            connection.commit()
+        connection.commit()
             # print(f"URL: {url}")
             # print(f"Name: {name}")
             # print(f"Price: {price}")
@@ -233,7 +233,7 @@ def main():
 
     # add_to_db(links)
 
-    nr_threads = 1
+    nr_threads = 4
 
     p = [0] * nr_threads
 
