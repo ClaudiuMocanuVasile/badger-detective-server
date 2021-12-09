@@ -212,14 +212,6 @@ def html_strip_tag(html_str):
 
     return content[:strip_end]
 
-# short test for izolate_html_class
-def test():
-    f = open("/tmp/clip", "r")
-    page = f.read()
-    f.close()
-    iz = izolate_html_class(page, "div", "class=\"card-v2\"")
-    print(iz)
-
 # Main
 def main():
     db_file_name = "product_prices.db"
