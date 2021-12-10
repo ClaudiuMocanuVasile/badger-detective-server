@@ -7,18 +7,21 @@ import sqlite3
 def index(request):
 
     context = {}
+    rows = False
+    db_path = "C:\\Users\\claud\\Desktop\\product_prices.db"
 
     if request.method == 'POST':
         form = ClientForm(request.POST)
         if form.is_valid():
             code = request.POST.get('link').split("/")[-2]
-            connection = sqlite3.connect("product_prices.db")
+            connection = sqlite3.connect(db_path)
             cursor = connection.cursor()
-            link = cursor.execute("SELECT date, price FROM prices WHERE id = ? ;", (code,)).fetchall()
+            rows = cursor.execute("SELECT date, price FROM prices WHERE id = ? ;", (code,)).fetchall()
+            # rows = "<br>".join([str(rows[i][1]) + " RON from " + rows[i][0] + " to " + rows[i+1][0] if i < len(rows)-1 else str(rows[i][1]) + " RON as of now." for i in range(len(rows))])
     else:
         form = ClientForm()
-        link = ""
 
-    context = { 'client_form': form, 'link': link}
+    context = { 'client_form': form, 'rows': rows}
 
     return render(request, 'publicHTML/index.html', context)
+

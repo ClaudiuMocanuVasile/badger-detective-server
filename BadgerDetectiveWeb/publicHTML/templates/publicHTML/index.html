@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 	<link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}" />
     <title>Document</title>
     <script type="text/javascript">
@@ -41,12 +42,82 @@
 			{{client_form.link}}
 			<input type="submit"/>
 		</form>
-		{% if link %}
-			<h4>Product ID: {{ link }}</h4>
+		{% if rows %}
+			<h4 id="output"></h4>
+            <canvas id="chart"></canvas>
 		{% endif %}
 
 	<div class="inaltator"> </div>
 	</div>
 </body>
+
+<script type="text/javascript">
+    var data = "{{rows|safe}}"
+    if(document.getElementById("output"))
+    {
+        data = data.slice(1, data.length - 1)
+        data = data.split(", ")
+
+        string = ""
+
+        graph_date_as_string = Array()
+        graph_date = Array()
+        graph_prices = Array()
+
+        for(let i = 0; i < data.length; i += 2)
+        {
+
+            data[i] = data[i].slice(2, data[i].length - 1)
+            let tmp = data[i].split("-")
+            data[i] = tmp[1] + "-" + tmp[0] + "-" + tmp[2]
+            graph_date_as_string.push(data[i])
+            data[i+1] = data[i+1].slice(0, data[i+1].length - 1)
+            data[i] = new Date(data[i])
+            graph_date.push(data[i])
+            graph_prices.push(parseFloat(data[i+1]))
+            let d = data[i].getDate()
+            let m = data[i].getMonth() + 1
+            let y = data[i].getFullYear()
+            
+            if( i > 0 && i < data.length - 1)
+            {
+                let tmp = new Date(data[i])
+                tmp.setDate(tmp.getDate() - 1)
+                tmp = new Date(tmp)
+                let d = tmp.getDate()
+                let m = tmp.getMonth() + 1
+                let y = tmp.getFullYear()
+                string += d + "/" + m + "/" + y + ".<br>"
+            }
+            if( i == data.length - 2)
+            {
+                string += data[i+1] + " RON as of " + d + "/" + m + "/" + y + "."
+            }
+            else
+            {
+                string += data[i+1] + " RON from " + d + "/" + m + "/" + y + " to "
+            }
+        }
+        const ctx = document.getElementById('chart').getContext('2d');
+        const myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: graph_date_as_string,
+                datasets: [{
+                    label: 'Price over time',
+                    data: graph_prices,
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.2)'
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+        });
+        document.getElementById("output").innerHTML = string
+    }
+</script>
 </html>
 

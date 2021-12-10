@@ -160,3 +160,8 @@ button{
 		background-color: #313543;
 	}
 }
+
+#chart{
+	width:400px;
+	height:400px;
+}
