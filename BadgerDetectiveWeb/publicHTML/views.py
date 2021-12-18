@@ -8,7 +8,7 @@ def index(request):
 
     context = {}
     rows = False
-    db_path = "C:\\Users\\claud\\Desktop\\product_prices.db"
+    db_path = "product_prices.db"
 
     if request.method == 'POST':
         form = ClientForm(request.POST)
