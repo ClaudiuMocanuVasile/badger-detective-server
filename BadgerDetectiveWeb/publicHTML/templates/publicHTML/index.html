@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+	<script src="{% static 'js/script.js' %}"></script>
+	<link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}" />
+	<link rel="shortcut icon" type="image/jpg" href="{% static 'images/badger.png' %}"/>
+    <title>Badger Detective</title>
+</head>
+<body>
+	<div class="container">
+		<h1>Badger Detective</h1>
+		<img src="{% static 'images/badger.gif' %}">
+		<p>Ce produs inspectati?</p>
+		<form method="POST" action="">
+			{% csrf_token %}
+			<label class="block mt-3 font-semibold">{{client_form.link.label}}</label>
+			{{client_form.link}}
+			<input type="submit"/>
+		</form>
+		{% if rows %}
+			<h4 id="output"></h4>
+            <canvas id="chart"></canvas>
+		{% endif %}
+
+	<div class="inaltator"> </div>
+	</div>
+</body>
+
+<script type="text/javascript">
+    var data = "{{rows|safe}}"
+	do_the_graph(data);
+</script>
+</html>
+
