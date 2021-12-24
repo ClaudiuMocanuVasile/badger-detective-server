@@ -12,3 +12,9 @@ https://www.emag.ro/placi_baza/c
 https://www.emag.ro/aspiratoare/c
 https://www.emag.ro/ups-cu-management/c
 https://www.emag.ro/boxe-portabile/c
+https://www.emag.ro/tablete-grafice/c
+https://www.emag.ro/placi_video/c
+https://www.emag.ro/memorii/c
+https://www.emag.ro/hard_disk-uri/c
+https://www.emag.ro/solid-state_drive_ssd_/c
+https://www.emag.ro/nas/c
