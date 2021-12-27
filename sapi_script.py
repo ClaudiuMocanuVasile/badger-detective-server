@@ -1,5 +1,4 @@
 #!/usr/bin/python3
-# use emag api
 import urllib.request
 import json
 import sqlite3
@@ -60,6 +59,8 @@ def parse_page(page_str):
     
     return len(parsed["data"]["items"]);
 
+offset_limit = 3000
+
 def do_the_category(cat_no, offset = 0):
     link = f"https://sapi.emag.ro/search-by-filters-with-redirect?source_id=7&templates[]=full&is_eab344=false&listing_display_id=2&page[limit]=100&page[offset]={offset}&filters[category][]={cat_no}";
     page_str = page_to_string(link);
@@ -68,7 +69,7 @@ def do_the_category(cat_no, offset = 0):
         print("Got empty page")
         return offset
     n = parse_page(page_str);
-    while n == 100:
+    while n == 100 and offset < offset_limit:
         offset += 100
         link = f"https://sapi.emag.ro/search-by-filters-with-redirect?source_id=7&templates[]=full&is_eab344=false&listing_display_id=2&page[limit]=100&page[offset]={offset}&filters[category][]={cat_no}";
         page_str = page_to_string(link);
