@@ -80,10 +80,24 @@ li img{
 	float: right;
 }
 
+form {
+	text-align: center;
+}
+
 button{
 	padding: 10px;
 	text-align: center;
 	font-size: 24;
+	margin: 0 auto;
+}
+input {
+	padding: 10px;
+	margin: 0 auto;
+ }
+
+#id_link {
+	width: 50%;
+	padding: 1px;
 }
 
 .orisontal{
