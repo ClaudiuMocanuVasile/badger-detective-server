@@ -22,6 +22,7 @@ function main()
 		return cookieValue;
 	}
 	var csrftoken = getCSRFToken("csrftoken");
+	clear_input();
 }
 
 function do_the_graph(data)
@@ -92,4 +93,13 @@ function do_the_graph(data)
         });
         document.getElementById("output").innerHTML = string
     }
+}
+
+function clear_input() {
+	let button = document.getElementById("ob");
+	button.onclick = () => {
+		let input = document.getElementById("id_link");
+		input.value= "";
+		console.log(input);
+	}
 }

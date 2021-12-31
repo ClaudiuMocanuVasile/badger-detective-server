@@ -20,12 +20,12 @@
 		Scopul este de a oferi o privire asupra schimbarii preturilor de pe <a href="https://emag.ro">emag.ro</a>.
 		Introduceti mai jos link-ul produsului care va intereseaza.</p>
 		<p>Ce produs inspectati?</p>
-		<p>Ce produs inspectati?</p>
 		<form method="POST" action="">
 			{% csrf_token %}
 			<label class="block mt-3 font-semibold">{{client_form.link.label}}</label>
 			{{client_form.link}}
-			<input type="submit"/>
+			<br><input type="submit"/>
+			<button type="button" id="ob">Clear</button>
 		</form>
 		{% if rows %}
 			<h4 id="output"></h4>
