@@ -27,7 +27,12 @@ SECRET_KEY = 'django-insecure-$-$+3^q&h6qiwym%z(&c)!3#3+*l&=61&rq(7=w6$&*)uj0x3-
 DEBUG = True
 
 ALLOWED_HOSTS = ["127.0.0.1", "thebadgers.live", "www.thebadgers.live"]
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
+CORS_ALLOW_CREDENTIALS = True
+CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_CREDENTIALS = True
+CSRF_TRUSTED_ORIGINS = ['https://thebadgers.live']
 
 # Application definition
 
