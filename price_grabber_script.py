@@ -74,9 +74,9 @@ def return_product_links(string):
 
     return pages
 
-def add_to_db(links):
+def add_to_db(links, db_file_name="product_prices.db"):
 
-    connection = sqlite3.connect("product_prices.db")
+    connection = sqlite3.connect(db_file_name)
 
     cursor = connection.cursor()
     cursor.execute("CREATE TABLE IF NOT EXISTS products (id TEXT primary key, name TEXT, url TEXT)")
@@ -116,7 +116,7 @@ def add_to_db(links):
                 if rows[0][0] != price:
                     cursor.execute("INSERT INTO prices(id, price, date) VALUES (?, ?, ?)", (id, price, time))
             
-            connection.commit()
+        connection.commit()
             # print(f"URL: {url}")
             # print(f"Name: {name}")
             # print(f"Price: {price}")
@@ -180,16 +180,41 @@ def izolate_html_class(page_str, tag_str, type_str):
         res.append(line)
     return res
 
-# short test for izolate_html_class
-def test():
-    f = open("/tmp/clip", "r")
-    page = f.read()
-    f.close()
-    iz = izolate_html_class(page, "div", "class=\"card-v2\"")
-    print(iz)
+# strip the tag <tag ...> and </tag>
+# @html_str: string, and html stuff thing...whatever
+# @return: string, the "innerHTML"
+def html_strip_tag(html_str):
+    if html_str[0] != '<':
+        return html_str
+    tag = html_str.split('<')[1]
+    full_tag = tag.split('>')[0]
+    tag = full_tag.split(' ')[0]
+
+    opened = f"<{tag}"
+    closed = f"</{tag}>"
+
+    # index1 - start of the content
+    strip_start = html_str.find('>') + 1
+    count = 1
+    # index2 - end of the conted
+    strip_end = None
+    content = html_str[strip_start:]
+    for (i, c) in enumerate(content):
+        if c == '<':
+            tag_end = content.find('>',i) + 1
+            if opened in content[i:tag_end]:
+                count += 1
+            if closed in content[i:tag_end]:
+                count -= 1
+            if count == 0:
+                strip_end = i
+                break
+
+    return content[:strip_end]
 
 # Main
 def main():
+    db_file_name = "product_prices.db"
     start = time.time()
 
     if len(sys.argv) != 2:
@@ -200,13 +225,13 @@ def main():
 
     # add_to_db(links)
 
-    nr_threads = 1
+    nr_threads = 4
 
     p = [0] * nr_threads
 
     k = 0
     for i in range(0, nr_threads):
-        p[i] = multiprocessing.Process(target=add_to_db, args=(links[k:k + len(links)//nr_threads + 1], ))
+        p[i] = multiprocessing.Process(target=add_to_db, args=(links[k:k + len(links)//nr_threads + 1], db_file_name))
         k += len(links)//nr_threads + 1
     
     for i in range(len(p)):
