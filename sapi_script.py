@@ -59,19 +59,19 @@ def parse_page(page_str):
     
     return len(parsed["data"]["items"]);
 
-offset_limit = 3000
+offset_limit = 10000
 
 def do_the_category(cat_no, offset = 0):
-    link = f"https://sapi.emag.ro/search-by-filters-with-redirect?source_id=7&templates[]=full&is_eab344=false&listing_display_id=2&page[limit]=100&page[offset]={offset}&filters[category][]={cat_no}";
+    link = f"https://sapi.emag.ro/search-by-filters-with-redirect?source_id=7&page[limit]=500&page[offset]={offset}&filters[category][]={cat_no}";
     page_str = page_to_string(link);
     if page_str is None:
         pass
         print("Got empty page")
         return offset
     n = parse_page(page_str);
-    while n == 100 and offset < offset_limit:
-        offset += 100
-        link = f"https://sapi.emag.ro/search-by-filters-with-redirect?source_id=7&templates[]=full&is_eab344=false&listing_display_id=2&page[limit]=100&page[offset]={offset}&filters[category][]={cat_no}";
+    while n == 500 and offset < offset_limit:
+        offset += 500
+        link = f"https://sapi.emag.ro/search-by-filters-with-redirect?source_id=7&page[limit]=500&page[offset]={offset}&filters[category][]={cat_no}";
         page_str = page_to_string(link);
         if page_str is None:
             pass
@@ -85,12 +85,12 @@ def main():
     # aici functia principala
     print("salutare lume!!");
     log_file = "last_accesed"
-    line = 0
+    line = 3
     offset = 0
     f = open("emag_links_2021_12_27.txt");
     page = f.readlines()
     for (i, line) in enumerate(page[line:]):
-        cat_no = int(line.strip().split(" ")[-2]);
+        cat_no = int(line.strip().split(" ")[-3]);
         res = do_the_category(cat_no, offset);
         if res is not None:
             f = open(log_file, "w")
